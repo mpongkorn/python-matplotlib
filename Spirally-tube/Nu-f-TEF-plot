@@ -1,0 +1,71 @@
+import numpy as np
+import math
+from pandas import DataFrame
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.ticker import MultipleLocator as tick
+import matplotlib.ticker as ticker
+import os
+import openpyxl
+
+Start = '6S' #edit start index to plot
+p_list = ['P10', 'P20', 'P30']
+element_size = '0.2mm'
+plot_list = ['Nu/Nu0', 'f/f0', 'TEF']
+plotname = ['Nu-Nu0', 'f-f0', 'TEF']
+
+for p in p_list:
+        for n in range(3):
+                # print(n)
+                plt.rcParams.update({'font.family':'times new roman', 'font.size':'11'})
+                fig, ax = plt.subplots()
+
+                MainDirectory = "C:/Users/pongkornmee/Downloads/Plotting" # change dir to locate .xlsx files
+                PartName = 'Fe3O4-NanoVF005%_'+ Start +'_'+ element_size
+
+                path = MainDirectory + '/' + PartName + '.xlsx'
+
+                sheet_list = [Start+' e0.50 '+ p, Start+' e0.75 '+ p, Start+' e1.00 '+ p, Start+' e1.25 '+ p, Start+' e1.50 '+ p]
+                sheet_name = ['sheet_name1', 'sheet_name2', 'sheet_name3', 'sheet_name4', 'sheet_name5']
+                Nu_list = ['Nu_list1', 'Nu_list2', 'Nu_list3', 'Nu_list4', 'Nu_list5']
+                line = ['line_1', 'line_2', 'line_3', 'line_4', 'line_5']
+                marker_list = ['o', 'D', 's', 'v', 'x']
+
+
+                for i in range(5):
+                        sheet_name[i] = pd.read_excel(path, sheet_name = sheet_list[i])
+
+                        Re_list = np.array(sheet_name[0]['Re'])
+                        Nu_list[i] = np.array(sheet_name[i][plot_list[n]]) #edit index for others plotting type
+                                    
+                        line[i] = ax.plot(Re_list, Nu_list[i], color='k', label=sheet_list[i], linestyle='--', marker=marker_list[i], fillstyle='none')
+                        # line[i] = ax.plot(Re_list, Nu_list[i], color='k', label=sheet_list[i], linestyle='--', marker=marker_list[i])
+
+
+                lns = line[0] + line[1] + line[2] + line[3] + line[4]    
+                labs = [l.get_label() for l in lns]
+                ax.legend(lns, labs, frameon=False, ncol=1, fontsize=10, loc='upper right')
+
+
+                ax.tick_params(which='both', direction='in')
+                ax.tick_params(which='major', length=3)
+
+                ax.set_ylim(0,max(Nu_list[i])*1.5) #set the limit of y axis value 7, 25, 3
+                ax.set_xlim(0,24000)
+                ax.xaxis.set_major_locator(ticker.MaxNLocator(6))
+                # ax.xaxis.set_major_locator(ticker.IndexLocator(base=4000, offset=0.25))
+
+                ax.set_xlabel('Re', fontsize=12)
+
+                if n == 2:
+                        ax.set_ylabel(plot_list[n], fontsize=12) #edit index for others plotting type
+                else:
+                        ax.set_ylabel(plot_list[n], fontsize=12, style='italic') #edit index for others plotting type
+
+                # ax.set_ylabel('$Nu/Nu_{0}$', fontsize=10)
+                # plt.title(PartName)
+                
+                print(Start + ' ' + p + ' ' + plotname[n])
+                plt.savefig(Start + ' ' + p + ' ' + plotname[n] + '.jpeg', dpi=1200)
+                
+                # plt.show()
